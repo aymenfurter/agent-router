@@ -1,3 +1,4 @@
+
 <p align="center">
   <h1 align="center">Agent Router</h1>
 </p>
@@ -11,12 +12,13 @@
   <a href="#"><img alt="Node 18+" src="https://img.shields.io/badge/Node-18%2B-339933?logo=node.js&logoColor=white" style="height:27px;vertical-align:middle;"/></a>
   <a href="#"><img alt="Flask backend" src="https://img.shields.io/badge/Flask-backend-000000?logo=flask&logoColor=white" style="height:27px;vertical-align:middle;"/></a>
 </p>
+ 
+<p align="center"><img  align="center" src="assets/demo.gif" width="850">
+</p>
 
-![Purview Agent Router UI Placeholder](docs/demo.gif)
+
 ---
 
-> ⚠️ **Demo Only**  
-> This repository is a reference/demo implementation. It is **not hardened for production**: no auth, rate limiting, secure secret handling, or resilience patterns are implemented. Review, extend, and secure before any real-world deployment.
 ## Overview
 
 Purview Agent Router is a sample application that:
@@ -28,38 +30,19 @@ Purview Agent Router is a sample application that:
   - Web Search Agent (Bing) for current / external info
 - Returns unified, annotated responses with citations
 
-## Key Features
+## Components
 
-- Purview-driven intent + asset discovery
-- Multi-agent orchestration via Azure AI Agent Service
-- Conversation threading + history 
-- Manual override (Fabric / RAG / Web / Genie / Auto)
-- Genie integration for analytical NL → SQL with row sampling
-- RAG vector store bootstrap (sample Encarta PDF)
-- Citation extraction (file + URL annotations)
-- Framer Motion animated chat UI (React + Tailwind)
-- Flask backend service + typed service layer
+| Layer | Tech | Purpose |
+|-------|------|---------|
+| UI | React + Vite + Tailwind | Chat experience + routing mode selection |
+| API | Flask | REST endpoints, agent service orchestration |
+| Routing | Azure AI Agent Service | Tool + connected agent coordination |
+| Discovery | Microsoft Purview | Catalog-driven intent + asset signals |
+| Analytics | Databricks Genie | NL to SQL + sample results |
+| Retrieval | RAG Agent | Document semantic search (sample PDF) |
+| External | Bing Search | Real-time / off-catalog queries |
 
 ## Architecture
-
-<table>
-<tr>
-<td width="420">
-
-### Flow Summary
-
-1. User query → UI  
-2. /api/analyze → Purview search  
-3. Routing heuristics decide target pathway  
-4. Azure AI Agent Service main routing agent orchestrates:  
-   - search_catalog (function tool)  
-   - handoff_genie_agent (function)  
-   - connected agents (fabric / rag / web)  
-5. Response + annotations normalized and returned  
-6. UI streams simulated typing + stores conversation
-
-</td>
-<td>
 
 ```mermaid
 graph TB
@@ -70,7 +53,6 @@ graph TB
 
     CatalogResults -->|Yes - Genie Agent| GenieFunc[🧞 Genie Function Tool]
     CatalogResults -->|Yes - RAG Agent| RAGAgent[📚 RAG Connected Agent]
-    CatalogResults -->|Yes - Fabric Agent| FabricAgent[🏢 Fabric Connected Agent]
     CatalogResults -->|No Assets Found| WebAgent[🌐 Web Connected Agent]
 
     GenieFunc --> Databricks[(🧱 Databricks\nGenie API)]
@@ -101,24 +83,9 @@ graph TB
     end
 ```
 
-</td>
-</tr>
-</table>
-
-## Components
-
-| Layer | Tech | Purpose |
-|-------|------|---------|
-| UI | React + Vite + Tailwind | Chat experience + routing mode selection |
-| API | Flask | REST endpoints, agent service orchestration |
-| Routing | Azure AI Agent Service | Tool + connected agent coordination |
-| Discovery | Microsoft Purview | Catalog-driven intent + asset signals |
-| Analytics | Databricks Genie | NL to SQL + sample results |
-| Retrieval | RAG Agent | Document semantic search (sample PDF) |
-| External | Bing Search | Real-time / off-catalog queries |
-
-## UI Technology Note
-The frontend is built using GitHub Spark (Built for rapid prototyping only).
+> ⚠️ **Demo Only**
+> 
+> This repository is a reference/demo implementation. It is **not hardened for production**: no auth, rate limiting, secure secret handling, or resilience patterns are implemented. Review, extend, and secure before any real-world deployment. The frontend is built using GitHub Spark (Built for rapid prototyping).
 
 ## Getting Started
 
