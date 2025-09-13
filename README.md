@@ -9,7 +9,7 @@
   <!-- Azure AI Foundry feature flag badge -->
   <a href="#"><img alt="Azure AI Foundry" src="https://img.shields.io/badge/Azure-AI%20Foundry-0078D4?logo=microsoftazure&logoColor=white" style="height:27px;vertical-align:middle;"/></a>
   <a href="#"><img alt="Python 3.10+" src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" style="height:27px;vertical-align:middle;"/></a>
-  <a href="#"><img alt="Node 18+" src="https://img.shields.io/badge/Node-18%2B-339933?logo=node.js&logoColor=white" style="height:27px;vertical-align:middle;"/></a>
+  <a href="#"><img alt="Node 22+" src="https://img.shields.io/badge/Node-18%2B-339933?logo=node.js&logoColor=white" style="height:27px;vertical-align:middle;"/></a>
   <a href="#"><img alt="Flask backend" src="https://img.shields.io/badge/Flask-backend-000000?logo=flask&logoColor=white" style="height:27px;vertical-align:middle;"/></a>
 </p>
  
@@ -32,56 +32,27 @@ Purview Agent Router is a sample application that:
 
 ## Components
 
+
+
+<table>
+<tr>
+<td width="600">
+<img src="assets/architecture.png" alt="Architecture Diagram" width="500"/>
+</td>
+<td>
+
 | Layer | Tech | Purpose |
 |-------|------|---------|
-| UI | React + Vite + Tailwind | Chat experience + routing mode selection |
-| API | Flask | REST endpoints, agent service orchestration |
-| Routing | Azure AI Agent Service | Tool + connected agent coordination |
-| Discovery | Microsoft Purview | Catalog-driven intent + asset signals |
-| Analytics | Databricks Genie | NL to SQL + sample results |
-| Retrieval | RAG Agent | Document semantic search (sample PDF) |
+| UI | React | Chat experience |
+| API | Flask | REST endpoints |
+| Routing | AI Agent Service | Multi-Agent orchestration |
+| Discovery | Microsoft Purview | Catalog-driven intent |
+| Analytics | Databricks Genie | NL to SQL (Structured) |
+| Retrieval | RAG Agent | Document search (Unstructured) |
 | External | Bing Search | Real-time / off-catalog queries |
-
-## Architecture
-
-```mermaid
-graph TB
-    User[👤 User Query] --> Router{🎯 Routing Agent}
-
-    Router --> Catalog[📋 Purview Catalog Search]
-    Catalog --> CatalogResults{Assets Found?}
-
-    CatalogResults -->|Yes - Genie Agent| GenieFunc[🧞 Genie Function Tool]
-    CatalogResults -->|Yes - RAG Agent| RAGAgent[📚 RAG Connected Agent]
-    CatalogResults -->|No Assets Found| WebAgent[🌐 Web Connected Agent]
-
-    GenieFunc --> Databricks[(🧱 Databricks\nGenie API)]
-    RAGAgent --> VectorStore[(🔍 Vector Store\nDocuments)]
-    WebAgent --> BingSearch[(🔎 Bing\nSearch API)]
-
-    Databricks --> Results[📊 Formatted Results]
-    VectorStore --> Results
-    BingSearch --> Results
-
-    Results --> Response[💬 User Response]
-
-    subgraph "Azure AI Agent Service"
-        Router
-        RAGAgent
-        WebAgent
-        VectorStore
-        BingSearch
-    end
-
-    subgraph "Function Tools"
-        Catalog
-        GenieFunc
-    end
-
-    subgraph "External Services"
-        Databricks
-    end
-```
+</td>
+</tr>
+</table>
 
 > ⚠️ **Demo Only**
 > 
@@ -92,7 +63,7 @@ graph TB
 ### 1. Prerequisites
 
 - Python 3.10+
-- Node 18+
+- Node 22+
 - Azure CLI logged in (`az login`)
 - Provisioned services (or access):
   - Purview
@@ -166,4 +137,4 @@ By opening a PR you agree it may be closed without detailed feedback.
 
 ## License
 
-This project is licensed under the MIT License - see LICENSE.
+This project is licensed under the MIT License - see LICENSE. The User Interface has seperate license terms. 
