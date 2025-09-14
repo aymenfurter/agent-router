@@ -29,6 +29,19 @@ sys.modules['azure.ai.agents.models'].BingGroundingTool = MagicMock()
 sys.modules['azure.ai.agents.models'].FileSearchTool = MagicMock()
 sys.modules['azure.ai.agents.models'].FilePurpose = MagicMock()
 
+# Mock requests globally to prevent any network calls during testing
+import requests
+original_get = requests.get
+def mock_get(*args, **kwargs):
+    if 'download.microsoft.com' in str(args[0]):
+        # Mock the PDF download response
+        mock_response = MagicMock()
+        mock_response.content = b'Mock PDF content for testing'
+        return mock_response
+    return original_get(*args, **kwargs)
+
+requests.get = mock_get
+
 @pytest.fixture(autouse=True)
 def mock_azure_dependencies():
     """Mock Azure dependencies to avoid authentication issues during testing"""
