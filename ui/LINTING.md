@@ -11,7 +11,7 @@ This project includes comprehensive linting and code formatting tools for the UI
 ## Available Scripts
 
 - `npm run lint` - Run ESLint to check for code issues
-- `npm run lint:fix` - Run ESLint and automatically fix fixable issues  
+- `npm run lint:fix` - Run ESLint and automatically fix fixable issues
 - `npm run format` - Format code with Prettier
 - `npm run format:check` - Check if code is properly formatted
 - `npm run type-check` - Run TypeScript type checking
@@ -20,6 +20,7 @@ This project includes comprehensive linting and code formatting tools for the UI
 ## Pre-commit Workflow
 
 Before committing code, run:
+
 ```bash
 cd ui
 npm run check-all
@@ -33,6 +34,7 @@ This will verify:
 ## CI/CD
 
 The GitHub Actions workflow `.github/workflows/ui-lint.yml` automatically runs these checks on:
+
 - Push to main/develop branches (when UI files change)
 - Pull requests to main/develop branches (when UI files change)
 - Manual workflow dispatch
