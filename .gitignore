@@ -15,3 +15,15 @@ yarn-error.log
 *.pyc
 *.pyo
 *.pyd
+
+# TypeScript build info
+*.tsbuildinfo
+
+# UI build artifacts  
+ui/dist/
+ui/build/
+
+# Environment files
+ui/.env.local
+ui/.env.development
+ui/.env.production

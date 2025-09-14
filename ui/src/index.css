@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 @layer base {
   * {
@@ -9,7 +9,7 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', sans-serif;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 
   .font-mono {
@@ -20,12 +20,12 @@
 :root {
   --background: oklch(0.06 0.02 245);
   --foreground: oklch(0.98 0.005 245);
-  
+
   --card: oklch(0.09 0.015 245);
   --card-foreground: oklch(0.98 0.005 245);
   --popover: oklch(0.09 0.015 245);
   --popover-foreground: oklch(0.98 0.005 245);
-  
+
   --primary: oklch(0.55 0.18 270);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.12 0.03 245);
@@ -36,11 +36,11 @@
   --accent-foreground: oklch(0.06 0.02 245);
   --destructive: oklch(0.65 0.22 15);
   --destructive-foreground: oklch(0.98 0.005 245);
-  
+
   --border: oklch(0.15 0.025 245);
   --input: oklch(0.12 0.02 245);
   --ring: oklch(0.55 0.18 270);
-  
+
   --radius: 1rem;
 }
 
@@ -64,7 +64,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -72,23 +72,35 @@
 }
 
 .gradient-bg {
-  background: 
-    radial-gradient(circle at 20% 20%, oklch(0.12 0.08 270 / 0.6) 0%, transparent 40%),
-    radial-gradient(circle at 80% 40%, oklch(0.1 0.06 190 / 0.4) 0%, transparent 50%),
-    radial-gradient(circle at 60% 80%, oklch(0.08 0.04 245 / 0.5) 0%, transparent 40%),
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      oklch(0.12 0.08 270 / 0.6) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 80% 40%,
+      oklch(0.1 0.06 190 / 0.4) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 60% 80%,
+      oklch(0.08 0.04 245 / 0.5) 0%,
+      transparent 40%
+    ),
     linear-gradient(135deg, oklch(0.07 0.02 245) 0%, oklch(0.05 0.015 250) 100%);
 }
 
 .card-gradient {
-  background: 
-    linear-gradient(145deg, 
-      oklch(0.11 0.025 245 / 0.95) 0%, 
-      oklch(0.08 0.02 250 / 0.98) 50%,
-      oklch(0.09 0.015 240 / 0.95) 100%
-    );
+  background: linear-gradient(
+    145deg,
+    oklch(0.11 0.025 245 / 0.95) 0%,
+    oklch(0.08 0.02 250 / 0.98) 50%,
+    oklch(0.09 0.015 240 / 0.95) 100%
+  );
   border: 1px solid oklch(0.18 0.04 245 / 0.6);
   backdrop-filter: blur(20px);
-  box-shadow: 
+  box-shadow:
     0 1px 3px oklch(0 0 0 / 0.12),
     0 1px 2px oklch(0 0 0 / 0.24),
     inset 0 1px 0 oklch(0.2 0.03 245 / 0.3);
@@ -96,21 +108,22 @@
 
 .card-gradient:hover {
   border-color: oklch(0.22 0.05 245 / 0.8);
-  box-shadow: 
+  box-shadow:
     0 4px 12px oklch(0 0 0 / 0.15),
     0 2px 4px oklch(0 0 0 / 0.12),
     inset 0 1px 0 oklch(0.25 0.04 245 / 0.4);
 }
 
 .glass-card {
-  background: linear-gradient(145deg, 
-    oklch(0.08 0.015 245 / 0.8) 0%, 
+  background: linear-gradient(
+    145deg,
+    oklch(0.08 0.015 245 / 0.8) 0%,
     oklch(0.06 0.01 250 / 0.9) 50%,
     oklch(0.07 0.015 240 / 0.85) 100%
   );
   backdrop-filter: blur(20px) saturate(150%);
   border: 1px solid oklch(0.18 0.03 245 / 0.2);
-  box-shadow: 
+  box-shadow:
     0 8px 32px oklch(0 0 0 / 0.12),
     0 4px 16px oklch(0 0 0 / 0.08),
     inset 0 1px 0 oklch(1 0 0 / 0.05);
@@ -118,34 +131,39 @@
 
 .glass-card:hover {
   border-color: oklch(0.22 0.04 245 / 0.3);
-  box-shadow: 
+  box-shadow:
     0 12px 40px oklch(0 0 0 / 0.15),
     0 6px 20px oklch(0 0 0 / 0.1),
     inset 0 1px 0 oklch(1 0 0 / 0.08);
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, 
-    oklch(0.7 0.15 190) 0%, 
+  background: linear-gradient(
+    135deg,
+    oklch(0.7 0.15 190) 0%,
     oklch(0.8 0.12 200) 30%,
     oklch(0.6 0.18 270) 70%,
-    oklch(0.55 0.16 280) 100%);
+    oklch(0.55 0.16 280) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-gradient-accent {
-  background: linear-gradient(90deg, 
-    oklch(0.75 0.15 190) 0%, 
-    oklch(0.65 0.18 270) 100%);
+  background: linear-gradient(
+    90deg,
+    oklch(0.75 0.15 190) 0%,
+    oklch(0.65 0.18 270) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .history-item {
-  background: linear-gradient(135deg,
+  background: linear-gradient(
+    135deg,
     oklch(0.1 0.02 245 / 0.9) 0%,
     oklch(0.08 0.015 250 / 0.95) 100%
   );
@@ -155,13 +173,14 @@
 }
 
 .history-item:hover {
-  background: linear-gradient(135deg,
+  background: linear-gradient(
+    135deg,
     oklch(0.12 0.025 245 / 0.95) 0%,
     oklch(0.1 0.02 250 / 0.98) 100%
   );
   border-color: oklch(0.25 0.06 245 / 0.7);
   transform: translateY(-2px);
-  box-shadow: 
+  box-shadow:
     0 6px 20px oklch(0 0 0 / 0.2),
     0 3px 8px oklch(0 0 0 / 0.15);
 }
@@ -177,7 +196,7 @@
 
 .message-bubble:hover {
   transform: translateY(-1px);
-  box-shadow: 
+  box-shadow:
     0 4px 12px oklch(0 0 0 / 0.1),
     0 2px 4px oklch(0 0 0 / 0.06);
 }
@@ -189,16 +208,18 @@
 
 .chat-input:focus {
   transform: translateY(-1px);
-  box-shadow: 
+  box-shadow:
     0 6px 20px oklch(0.7 0.15 190 / 0.12),
     0 2px 6px oklch(0 0 0 / 0.08);
 }
 
 /* History overlay backdrop */
 .history-overlay-backdrop {
-  background: radial-gradient(circle at 50% 50%, 
-    oklch(0.05 0.01 245 / 0.8) 0%, 
-    oklch(0.04 0.005 250 / 0.6) 100%);
+  background: radial-gradient(
+    circle at 50% 50%,
+    oklch(0.05 0.01 245 / 0.8) 0%,
+    oklch(0.04 0.005 250 / 0.6) 100%
+  );
   backdrop-filter: blur(12px) saturate(120%);
 }
 
@@ -231,7 +252,7 @@
 }
 
 .loading-border::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border-radius: 30px; /* Adjusted for the new spacing */
@@ -239,14 +260,16 @@
   background: linear-gradient(
     90deg,
     transparent,
-    oklch(0.7 0.15 190 / 0.4), /* Slightly reduced opacity for subtlety */
-    oklch(0.65 0.18 270 / 0.8),
+    oklch(0.7 0.15 190 / 0.4),
+    /* Slightly reduced opacity for subtlety */ oklch(0.65 0.18 270 / 0.8),
     oklch(0.7 0.15 190 / 0.4),
     transparent
   );
   background-size: 200% 100%;
   animation: loadingBorderSweep 2.5s linear infinite; /* Slightly slower for elegance */
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
@@ -256,8 +279,8 @@
   background: linear-gradient(
     90deg,
     transparent,
-    oklch(0.6 0.18 270 / 0.4), /* Purple tones for Purview */
-    oklch(0.55 0.2 280 / 0.8),
+    oklch(0.6 0.18 270 / 0.4),
+    /* Purple tones for Purview */ oklch(0.55 0.2 280 / 0.8),
     oklch(0.6 0.18 270 / 0.4),
     transparent
   );
@@ -269,8 +292,8 @@
   background: linear-gradient(
     90deg,
     transparent,
-    oklch(0.7 0.15 150 / 0.4), /* Emerald/green tones for Fabric */
-    oklch(0.65 0.18 140 / 0.8),
+    oklch(0.7 0.15 150 / 0.4),
+    /* Emerald/green tones for Fabric */ oklch(0.65 0.18 140 / 0.8),
     oklch(0.7 0.15 150 / 0.4),
     transparent
   );
@@ -282,8 +305,8 @@
   background: linear-gradient(
     90deg,
     transparent,
-    oklch(0.92 0.01 245 / 0.4), /* Secondary/white tones for RAG */
-    oklch(0.95 0.005 245 / 0.8),
+    oklch(0.92 0.01 245 / 0.4),
+    /* Secondary/white tones for RAG */ oklch(0.95 0.005 245 / 0.8),
     oklch(0.92 0.01 245 / 0.4),
     transparent
   );
@@ -295,8 +318,8 @@
   background: linear-gradient(
     90deg,
     transparent,
-    oklch(0.75 0.18 50 / 0.4), /* Orange tones for Web */
-    oklch(0.7 0.2 45 / 0.8),
+    oklch(0.75 0.18 50 / 0.4),
+    /* Orange tones for Web */ oklch(0.7 0.2 45 / 0.8),
     oklch(0.75 0.18 50 / 0.4),
     transparent
   );
@@ -308,8 +331,8 @@
   background: linear-gradient(
     90deg,
     transparent,
-    oklch(0.7 0.18 10 / 0.4), /* Rose/pink tones for Genie */
-    oklch(0.65 0.2 350 / 0.8),
+    oklch(0.7 0.18 10 / 0.4),
+    /* Rose/pink tones for Genie */ oklch(0.65 0.2 350 / 0.8),
     oklch(0.7 0.18 10 / 0.4),
     transparent
   );
@@ -321,8 +344,8 @@
   background: linear-gradient(
     90deg,
     transparent,
-    oklch(0.6 0.15 220 / 0.4), /* Blue tones for User */
-    oklch(0.55 0.18 230 / 0.8),
+    oklch(0.6 0.15 220 / 0.4),
+    /* Blue tones for User */ oklch(0.55 0.18 230 / 0.8),
     oklch(0.6 0.15 220 / 0.4),
     transparent
   );
@@ -345,7 +368,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
   }
   50% {
