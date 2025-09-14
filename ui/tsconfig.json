@@ -26,8 +26,11 @@
         "./src/*"
       ]
     },
+    /* Testing */
+    "types": ["vitest/globals", "jsdom", "@testing-library/jest-dom"]
   },
   "include": [
-    "src"
+    "src",
+    "vite.config.ts"
   ]
 }

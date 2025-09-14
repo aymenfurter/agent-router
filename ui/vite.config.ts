@@ -1,12 +1,13 @@
+/// <reference types="vitest" />
+/// <reference types="vite/client" />
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react-swc";
-import { defineConfig, PluginOption } from "vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+import { resolve } from 'node:path'
+import { fileURLToPath, URL } from 'node:url'
 
 import sparkPlugin from "@github/spark/spark-vite-plugin";
 import createIconImportProxy from "@github/spark/vitePhosphorIconProxyPlugin";
-import { resolve } from 'path'
-
-const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -14,12 +15,31 @@ export default defineConfig({
     react(),
     tailwindcss(),
     // DO NOT REMOVE
-    createIconImportProxy() as PluginOption,
-    sparkPlugin() as PluginOption,
+    createIconImportProxy(),
+    sparkPlugin(),
   ],
   resolve: {
     alias: {
-      '@': resolve(projectRoot, 'src')
+      '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.ts',
+    exclude: ['**/tests/e2e/**', '**/node_modules/**', '**/dist/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/test/',
+        '**/*.d.ts',
+        'dist/',
+        'coverage/',
+        '**/*.config.*',
+        'tests/e2e/**'
+      ]
+    }
+  }
 });
