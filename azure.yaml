@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: agent-router
+metadata:
+  template: agent-router@0.0.1-beta
+
+# Define the service that will be deployed
+services:
+  agent-router:
+    project: .
+    language: python
+    host: appservice
+
+# Define the Azure resources to provision
+infra:
+  provider: bicep
+  path: infra
+
+# Additional configuration
+hooks:
+  prebuild:
+    posix:
+      shell: sh
+      run: |
+        echo "Installing Python dependencies..."
+        pip install -r requirements.txt
+  
+  predeploy:
+    posix:
+      shell: sh
+      run: |
+        echo "Building UI components..."
+        cd ui && npm install && npm run build
+        cd .. && mkdir -p dist && cp -r ui/dist/* dist/

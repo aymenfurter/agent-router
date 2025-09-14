@@ -1,0 +1,271 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.37.4.10188",
+      "templateHash": "12001208578654495066"
+    }
+  },
+  "parameters": {
+    "environmentName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "metadata": {
+        "description": "Name of the environment which is used to generate a short unique hash used in all resources."
+      }
+    },
+    "location": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Primary location for all resources"
+      }
+    },
+    "principalId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Id of the user or app to assign application roles"
+      }
+    }
+  },
+  "variables": {
+    "resourceToken": "[uniqueString(subscription().id, resourceGroup().id, parameters('location'), parameters('environmentName'))]",
+    "keyVaultSecretsUserRole": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2024-11-30",
+      "name": "[format('azid{0}', variables('resourceToken'))]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "azd-env-name": "[parameters('environmentName')]"
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2025-02-01",
+      "name": "[format('azlog{0}', variables('resourceToken'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30,
+        "features": {
+          "enableLogAccessUsingOnlyResourcePermissions": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[format('azai{0}', variables('resourceToken'))]",
+      "location": "[parameters('location')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', format('azlog{0}', variables('resourceToken')))]",
+        "IngestionMode": "LogAnalytics",
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', format('azlog{0}', variables('resourceToken')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2024-11-01",
+      "name": "[format('azkv{0}', variables('resourceToken'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantId]",
+        "enabledForTemplateDeployment": true,
+        "enableRbacAuthorization": true,
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2024-11-01",
+      "name": "[format('azasp{0}', variables('resourceToken'))]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "S1",
+        "tier": "Standard",
+        "capacity": 1
+      },
+      "properties": {
+        "reserved": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2024-11-01",
+      "name": "[format('azapp{0}', variables('resourceToken'))]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "azd-service-name": "agent-router"
+      },
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('azid{0}', variables('resourceToken'))))]": {}
+        }
+      },
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', format('azasp{0}', variables('resourceToken')))]",
+        "httpsOnly": true,
+        "keyVaultReferenceIdentity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('azid{0}', variables('resourceToken')))]",
+        "siteConfig": {
+          "linuxFxVersion": "PYTHON|3.12",
+          "alwaysOn": true,
+          "ftpsState": "Disabled",
+          "minTlsVersion": "1.2",
+          "pythonVersion": "3.12",
+          "appSettings": [
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(resourceId('Microsoft.Insights/components', format('azai{0}', variables('resourceToken'))), '2020-02-02').ConnectionString]"
+            },
+            {
+              "name": "AZURE_KEY_VAULT_ENDPOINT",
+              "value": "[reference(resourceId('Microsoft.KeyVault/vaults', format('azkv{0}', variables('resourceToken'))), '2024-11-01').vaultUri]"
+            },
+            {
+              "name": "AZURE_CLIENT_ID",
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('azid{0}', variables('resourceToken'))), '2024-11-30').clientId]"
+            },
+            {
+              "name": "FLASK_HOST",
+              "value": "0.0.0.0"
+            },
+            {
+              "name": "FLASK_PORT",
+              "value": "8000"
+            },
+            {
+              "name": "FLASK_DEBUG",
+              "value": "false"
+            },
+            {
+              "name": "AZURE_AI_AGENT_ENDPOINT",
+              "value": ""
+            },
+            {
+              "name": "MODEL_DEPLOYMENT_NAME",
+              "value": ""
+            },
+            {
+              "name": "PURVIEW_ENDPOINT",
+              "value": ""
+            },
+            {
+              "name": "BING_CONNECTION_ID",
+              "value": ""
+            },
+            {
+              "name": "FABRIC_CONNECTION_ID",
+              "value": ""
+            },
+            {
+              "name": "ENABLE_FABRIC_AGENT",
+              "value": "false"
+            },
+            {
+              "name": "DATABRICKS_INSTANCE",
+              "value": ""
+            },
+            {
+              "name": "GENIE_SPACE_ID",
+              "value": ""
+            },
+            {
+              "name": "DATABRICKS_AUTH_TOKEN",
+              "value": ""
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/components', format('azai{0}', variables('resourceToken')))]",
+        "[resourceId('Microsoft.Web/serverfarms', format('azasp{0}', variables('resourceToken')))]",
+        "[resourceId('Microsoft.KeyVault/vaults', format('azkv{0}', variables('resourceToken')))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('azid{0}', variables('resourceToken')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites/siteextensions",
+      "apiVersion": "2024-11-01",
+      "name": "[format('{0}/{1}', format('azapp{0}', variables('resourceToken')), 'python311x64')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', format('azapp{0}', variables('resourceToken')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.KeyVault/vaults/{0}', format('azkv{0}', variables('resourceToken')))]",
+      "name": "[guid(resourceId('Microsoft.KeyVault/vaults', format('azkv{0}', variables('resourceToken'))), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('azid{0}', variables('resourceToken'))), variables('keyVaultSecretsUserRole'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('keyVaultSecretsUserRole')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('azid{0}', variables('resourceToken'))), '2024-11-30').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', format('azkv{0}', variables('resourceToken')))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('azid{0}', variables('resourceToken')))]"
+      ]
+    },
+    {
+      "condition": "[not(empty(parameters('principalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.KeyVault/vaults/{0}', format('azkv{0}', variables('resourceToken')))]",
+      "name": "[guid(resourceId('Microsoft.KeyVault/vaults', format('azkv{0}', variables('resourceToken'))), parameters('principalId'), variables('keyVaultSecretsUserRole'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('keyVaultSecretsUserRole')]",
+        "principalId": "[parameters('principalId')]",
+        "principalType": "User"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', format('azkv{0}', variables('resourceToken')))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "RESOURCE_GROUP_ID": {
+      "type": "string",
+      "value": "[resourceGroup().id]"
+    },
+    "WEB_APP_NAME": {
+      "type": "string",
+      "value": "[format('azapp{0}', variables('resourceToken'))]"
+    },
+    "WEB_APP_URL": {
+      "type": "string",
+      "value": "[format('https://{0}', reference(resourceId('Microsoft.Web/sites', format('azapp{0}', variables('resourceToken'))), '2024-11-01').defaultHostName)]"
+    },
+    "AZURE_KEY_VAULT_ENDPOINT": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.KeyVault/vaults', format('azkv{0}', variables('resourceToken'))), '2024-11-01').vaultUri]"
+    },
+    "MANAGED_IDENTITY_CLIENT_ID": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('azid{0}', variables('resourceToken'))), '2024-11-30').clientId]"
+    },
+    "APPLICATION_INSIGHTS_CONNECTION_STRING": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/components', format('azai{0}', variables('resourceToken'))), '2020-02-02').ConnectionString]"
+    }
+  }
+}
