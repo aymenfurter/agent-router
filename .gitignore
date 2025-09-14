@@ -15,3 +15,10 @@ yarn-error.log
 *.pyc
 *.pyo
 *.pyd
+
+# UI specific
+ui/node_modules/
+ui/coverage/
+ui/dist/
+ui/playwright-report/
+ui/test-results/
