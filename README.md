@@ -124,6 +124,40 @@ Use the gear dropdown near the input:
 - Auto (Purview guided)
 - RAG / Web / Databricks Genie / Fabric (if enabled)
 
+## Development
+
+### Code Quality
+
+The project uses several Python linting and formatting tools to maintain code quality:
+
+- **Black**: Code formatting
+- **isort**: Import sorting
+- **flake8**: Style and syntax checking  
+- **mypy**: Static type checking
+
+#### Running Linting
+
+```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Run all linting checks
+./lint.sh
+
+# Auto-format code
+./format.sh
+
+# Or run tools individually:
+black .
+isort .
+flake8 .
+mypy .
+```
+
+#### CI/CD
+
+GitHub Actions automatically runs linting on all pull requests and pushes to main branch.
+
 ## Contributing
 
 This repository is a one-off demo/reference drop. It is not an actively maintained project.

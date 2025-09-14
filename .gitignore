@@ -15,3 +15,7 @@ yarn-error.log
 *.pyc
 *.pyo
 *.pyd
+
+# Linting and type checking cache
+.mypy_cache/
+.black/
