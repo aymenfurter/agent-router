@@ -51,6 +51,13 @@ class TestFlaskApp:
         css_file = dist_dir / "styles.css"
         css_file.write_text("body { margin: 0; }")
         
+        # Patch the DIST_DIR in app module
+        monkeypatch.setattr('app.DIST_DIR', str(dist_dir))
+        return dist_dir
+        
+        css_file = dist_dir / "styles.css"
+        css_file.write_text("body { margin: 0; }")
+        
         # Patch the DIST_DIR in the app module
         monkeypatch.setattr('app.DIST_DIR', str(dist_dir))
         return str(dist_dir)

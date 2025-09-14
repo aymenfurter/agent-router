@@ -59,20 +59,24 @@ class TestAgentFactory:
     @patch('services.agent_factory.settings')
     def test_create_fabric_agent_enabled(self, mock_settings, mock_fabric_tool, agent_factory, mock_project_client):
         """Test create_fabric_agent when properly configured"""
-        # Setup mocks
+        # Setup settings mocks
         mock_settings.ENABLE_FABRIC_AGENT = True
         mock_settings.FABRIC_CONNECTION_ID = 'fabric-conn-123'
         mock_settings.MODEL_DEPLOYMENT_NAME = 'test-model'
         
+        # Setup FabricTool mock
         mock_tool_instance = Mock()
         mock_tool_instance.definitions = ['fabric_tool_def']
         mock_fabric_tool.return_value = mock_tool_instance
         
+        # Setup agent creation mock
         mock_agent = Mock(id='fabric-agent-456')
         mock_project_client.agents.create_agent.return_value = mock_agent
         
+        # Call the method
         result = agent_factory.create_fabric_agent()
         
+        # Assertions
         assert result == mock_agent
         mock_fabric_tool.assert_called_once_with(connection_id='fabric-conn-123')
         mock_project_client.agents.create_agent.assert_called_once_with(
@@ -86,19 +90,23 @@ class TestAgentFactory:
     @patch('services.agent_factory.settings')
     def test_create_web_agent(self, mock_settings, mock_bing_tool, agent_factory, mock_project_client):
         """Test create_web_agent"""
-        # Setup mocks
+        # Setup settings mocks
         mock_settings.BING_CONNECTION_ID = 'bing-conn-123'
         mock_settings.MODEL_DEPLOYMENT_NAME = 'test-model'
         
+        # Setup BingGroundingTool mock
         mock_tool_instance = Mock()
         mock_tool_instance.definitions = ['bing_tool_def']
         mock_bing_tool.return_value = mock_tool_instance
         
+        # Setup agent creation mock
         mock_agent = Mock(id='web-agent-456')
         mock_project_client.agents.create_agent.return_value = mock_agent
         
+        # Call the method
         result = agent_factory.create_web_agent()
         
+        # Assertions
         assert result == mock_agent
         mock_bing_tool.assert_called_once_with(connection_id='bing-conn-123')
         mock_project_client.agents.create_agent.assert_called_once_with(
@@ -116,55 +124,72 @@ class TestAgentFactory:
     def test_create_rag_agent(self, mock_settings, mock_file_purpose, mock_file_search_tool, 
                              mock_requests, mock_path, agent_factory, mock_project_client):
         """Test create_rag_agent"""
-        # Setup mocks
+        # Setup settings mocks
         mock_settings.MODEL_DEPLOYMENT_NAME = 'test-model'
         
-        # Mock Path operations
+        # Mock Path operations - create mock objects for data_dir and file_path
         mock_data_dir = Mock()
         mock_file_path = Mock()
         mock_file_path.exists.return_value = False
-        mock_data_dir.__truediv__.return_value = mock_file_path
+        mock_file_path.__str__ = Mock(return_value='/tmp/data/encarta_guide.pdf')
+        
+        # Mock Path constructor to return data_dir mock
         mock_path.return_value = mock_data_dir
+        # Mock the division operator for data_dir / "encarta_guide.pdf"
+        mock_data_dir.__truediv__ = Mock(return_value=mock_file_path)
         
-        # Mock requests
-        mock_response = Mock()
-        mock_response.content = b'PDF content'
-        mock_requests.get.return_value = mock_response
+        # Mock the data_dir.mkdir method
+        mock_data_dir.mkdir = Mock()
         
-        # Mock file operations
-        mock_file = Mock(id='file-123')
-        mock_project_client.agents.files.upload_and_poll.return_value = mock_file
-        
-        # Mock vector store
-        mock_vector_store = Mock(id='vs-456')
-        mock_project_client.agents.vector_stores.create_and_poll.return_value = mock_vector_store
-        
-        # Mock file search tool
-        mock_tool_instance = Mock()
-        mock_tool_instance.definitions = ['file_search_def']
-        mock_tool_instance.resources = {'file_search': 'resources'}
-        mock_file_search_tool.return_value = mock_tool_instance
-        
-        # Mock agent
-        mock_agent = Mock(id='rag-agent-789')
-        mock_project_client.agents.create_agent.return_value = mock_agent
-        
-        result = agent_factory.create_rag_agent()
-        
-        assert isinstance(result, tuple)
-        agent, cleanup_resources = result
-        assert agent == mock_agent
-        assert cleanup_resources['vector_store'] == mock_vector_store
-        assert cleanup_resources['file'] == mock_file
-        
-        # Verify file download was attempted
-        mock_requests.get.assert_called_once()
-        
-        # Verify file upload
-        mock_project_client.agents.files.upload_and_poll.assert_called_once()
-        
-        # Verify vector store creation
-        mock_project_client.agents.vector_stores.create_and_poll.assert_called_once()
+        # Mock file operations - open
+        with patch('builtins.open', create=True) as mock_open:
+            mock_file_handle = Mock()
+            mock_open.return_value.__enter__.return_value = mock_file_handle
+            
+            # Mock requests
+            mock_response = Mock()
+            mock_response.content = b'PDF content'
+            mock_requests.get.return_value = mock_response
+            
+            # Mock Azure file operations
+            mock_file = Mock(id='file-123')
+            mock_project_client.agents.files.upload_and_poll.return_value = mock_file
+            
+            # Mock vector store
+            mock_vector_store = Mock(id='vs-456')
+            mock_project_client.agents.vector_stores.create_and_poll.return_value = mock_vector_store
+            
+            # Mock file search tool
+            mock_tool_instance = Mock()
+            mock_tool_instance.definitions = ['file_search_def']
+            mock_tool_instance.resources = {'file_search': 'resources'}
+            mock_file_search_tool.return_value = mock_tool_instance
+            
+            # Mock agent
+            mock_agent = Mock(id='rag-agent-789')
+            mock_project_client.agents.create_agent.return_value = mock_agent
+            
+            # Call the method
+            result = agent_factory.create_rag_agent()
+            
+            # Assertions
+            assert isinstance(result, tuple)
+            assert result[0] == mock_agent
+            assert 'vector_store' in result[1]
+            assert 'file' in result[1]
+            agent, cleanup_resources = result
+            assert agent == mock_agent
+            assert cleanup_resources['vector_store'] == mock_vector_store
+            assert cleanup_resources['file'] == mock_file
+            
+            # Verify file download was attempted
+            mock_requests.get.assert_called_once()
+            
+            # Verify file upload
+            mock_project_client.agents.files.upload_and_poll.assert_called_once()
+            
+            # Verify vector store creation
+            mock_project_client.agents.vector_stores.create_and_poll.assert_called_once()
     
     @patch('services.agent_factory.ConnectedAgentTool')
     @patch('services.agent_factory.FunctionTool') 
@@ -207,9 +232,13 @@ class TestAgentFactory:
         
         # Verify function tool was created with correct functions
         mock_function_tool.assert_called_once()
-        call_args = mock_function_tool.call_args[1]
-        assert search_function in call_args['functions']
-        assert genie_function in call_args['functions']
+        # The functions are passed as a set, so we need to check differently
+        call_args = mock_function_tool.call_args
+        assert len(call_args) > 0  # Called with arguments
+        functions_arg = call_args[1]['functions'] if 'functions' in call_args[1] else call_args[0][0]
+        # Check that both functions are in the set
+        assert search_function in functions_arg
+        assert genie_function in functions_arg
         
         # Verify connected agent tools were created
         assert mock_connected_tool.call_count == 2
@@ -228,10 +257,12 @@ class TestAgentFactory:
         mock_data_dir = Mock()
         mock_file_path = Mock()
         mock_file_path.exists.return_value = True  # File exists
-        mock_data_dir.__truediv__.return_value = mock_file_path
+        mock_file_path.__str__ = Mock(return_value='/tmp/data/encarta_guide.pdf')
+        mock_data_dir.__truediv__ = Mock(return_value=mock_file_path)
+        mock_data_dir.mkdir = Mock()
         mock_path.return_value = mock_data_dir
         
-        # Mock other operations
+        # Mock other Azure operations
         mock_file = Mock(id='file-existing')
         mock_project_client.agents.files.upload_and_poll.return_value = mock_file
         
@@ -242,13 +273,17 @@ class TestAgentFactory:
         mock_project_client.agents.create_agent.return_value = mock_agent
         
         with patch('services.agent_factory.FileSearchTool') as mock_file_search_tool, \
-             patch('services.agent_factory.requests') as mock_requests:
+             patch('services.agent_factory.requests') as mock_requests, \
+             patch('services.agent_factory.settings') as mock_settings:
+            
+            mock_settings.MODEL_DEPLOYMENT_NAME = 'test-model'
             
             mock_tool_instance = Mock()
             mock_tool_instance.definitions = ['file_search_def']
             mock_tool_instance.resources = {'file_search': 'resources'}
             mock_file_search_tool.return_value = mock_tool_instance
             
+            # Call the method
             agent, cleanup_resources = agent_factory.create_rag_agent()
             
             # Verify requests.get was NOT called since file exists
@@ -256,4 +291,6 @@ class TestAgentFactory:
             
             # Verify other operations still occurred
             assert agent == mock_agent
+            assert cleanup_resources['vector_store'] == mock_vector_store
+            assert cleanup_resources['file'] == mock_file
             assert cleanup_resources['file'] == mock_file
