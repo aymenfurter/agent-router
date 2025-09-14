@@ -23,6 +23,10 @@ yarn-error.log
 ui/dist/
 ui/build/
 
+# Test coverage and cache
+ui/coverage/
+ui/.vitest/
+
 # Environment files
 ui/.env.local
 ui/.env.development
