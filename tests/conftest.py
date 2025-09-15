@@ -59,7 +59,8 @@ def mock_azure_dependencies():
         # Mock the connected agent service methods with default responses
         from services.connected_agent_service import connected_agent_service
         
-        # Mock common service methods
+        # Mock common service methods  
+        # Note: catalog_service is excluded from global mocking to avoid conflicts with individual test patches
         with patch.object(connected_agent_service, 'get_health_status') as mock_health, \
              patch.object(connected_agent_service, 'get_thread_messages') as mock_messages, \
              patch.object(connected_agent_service, 'analyze_purview') as mock_analyze, \
@@ -134,7 +135,7 @@ def env_vars():
     return {
         'AZURE_AI_AGENT_ENDPOINT': 'https://test.endpoint.com',
         'MODEL_DEPLOYMENT_NAME': 'test-model',
-        'PURVIEW_ENDPOINT': 'https://test-purview.azure.com',
+        'PURVIEW_ENDPOINT': 'https://test-purview.endpoint.com',
         'BING_CONNECTION_ID': 'test-bing-id',
         'FABRIC_CONNECTION_ID': 'test-fabric-id',
         'ENABLE_FABRIC_AGENT': 'true',

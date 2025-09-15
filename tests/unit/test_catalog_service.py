@@ -60,7 +60,7 @@ class TestCatalogService:
     def test_search_catalog_successful(self, mock_settings, mock_cred, catalog_service):
         """Test successful catalog search"""
         # Mock settings
-        mock_settings.PURVIEW_ENDPOINT = "https://test-purview.azure.com"
+        mock_settings.PURVIEW_ENDPOINT = "https://test-purview.endpoint.com"
         
         # Mock credential
         mock_token = Mock()
@@ -87,7 +87,7 @@ class TestCatalogService:
         
         responses.add(
             responses.POST,
-            'https://test-purview.azure.com/datamap/api/search/query?api-version=2023-09-01',
+            'https://test-purview.endpoint.com/datamap/api/search/query?api-version=2023-09-01',
             json=api_response,
             status=200
         )
@@ -115,7 +115,7 @@ class TestCatalogService:
     @patch('services.catalog_service.settings')
     def test_search_catalog_no_results(self, mock_settings, mock_cred, catalog_service):
         """Test catalog search with no results"""
-        mock_settings.PURVIEW_ENDPOINT = "https://test-purview.azure.com"
+        mock_settings.PURVIEW_ENDPOINT = "https://test-purview.endpoint.com"
         
         mock_token = Mock()
         mock_token.token = "test_access_token"
@@ -126,7 +126,7 @@ class TestCatalogService:
         
         responses.add(
             responses.POST,
-            'https://test-purview.azure.com/datamap/api/search/query?api-version=2023-09-01',
+            'https://test-purview.endpoint.com/datamap/api/search/query?api-version=2023-09-01',
             json=api_response,
             status=200
         )
@@ -142,7 +142,7 @@ class TestCatalogService:
     @patch('services.catalog_service.settings')
     def test_search_catalog_with_filters(self, mock_settings, mock_cred, catalog_service):
         """Test that catalog search includes proper filters"""
-        mock_settings.PURVIEW_ENDPOINT = "https://test-purview.azure.com"
+        mock_settings.PURVIEW_ENDPOINT = "https://test-purview.endpoint.com"
         
         mock_token = Mock()
         mock_token.token = "test_access_token"
@@ -171,7 +171,7 @@ class TestCatalogService:
         
         responses.add_callback(
             responses.POST,
-            'https://test-purview.azure.com/datamap/api/search/query?api-version=2023-09-01',
+            'https://test-purview.endpoint.com/datamap/api/search/query?api-version=2023-09-01',
             callback=request_callback,
             content_type='application/json'
         )
@@ -183,7 +183,7 @@ class TestCatalogService:
     @patch('services.catalog_service.settings')
     def test_search_catalog_http_error(self, mock_settings, mock_cred, catalog_service):
         """Test catalog search with HTTP error"""
-        mock_settings.PURVIEW_ENDPOINT = "https://test-purview.azure.com"
+        mock_settings.PURVIEW_ENDPOINT = "https://test-purview.endpoint.com"
         
         mock_token = Mock()
         mock_token.token = "test_access_token"
@@ -191,7 +191,7 @@ class TestCatalogService:
         
         responses.add(
             responses.POST,
-            'https://test-purview.azure.com/datamap/api/search/query?api-version=2023-09-01',
+            'https://test-purview.endpoint.com/datamap/api/search/query?api-version=2023-09-01',
             json={'error': 'Not found'},
             status=404
         )
@@ -206,7 +206,7 @@ class TestCatalogService:
             with patch('services.catalog_service.AzureCliCredential') as mock_cred, \
                  patch('services.catalog_service.settings') as mock_settings:
                 
-                mock_settings.PURVIEW_ENDPOINT = "https://test-purview.azure.com"
+                mock_settings.PURVIEW_ENDPOINT = "https://test-purview.endpoint.com"
                 mock_token = Mock()
                 mock_token.token = "test_token"
                 mock_cred.return_value.get_token.return_value = mock_token
@@ -224,7 +224,7 @@ class TestCatalogService:
                 
                 rsps.add(
                     responses.POST,
-                    'https://test-purview.azure.com/datamap/api/search/query?api-version=2023-09-01',
+                    'https://test-purview.endpoint.com/datamap/api/search/query?api-version=2023-09-01',
                     json=api_response,
                     status=200
                 )
@@ -243,7 +243,7 @@ class TestCatalogService:
             with patch('services.catalog_service.AzureCliCredential') as mock_cred, \
                  patch('services.catalog_service.settings') as mock_settings:
                 
-                mock_settings.PURVIEW_ENDPOINT = "https://test-purview.azure.com"
+                mock_settings.PURVIEW_ENDPOINT = "https://test-purview.endpoint.com"
                 mock_token = Mock()
                 mock_token.token = "test_token"
                 mock_cred.return_value.get_token.return_value = mock_token
@@ -262,7 +262,7 @@ class TestCatalogService:
                 
                 rsps.add(
                     responses.POST,
-                    'https://test-purview.azure.com/datamap/api/search/query?api-version=2023-09-01',
+                    'https://test-purview.endpoint.com/datamap/api/search/query?api-version=2023-09-01',
                     json=api_response,
                     status=200
                 )
@@ -290,11 +290,11 @@ class TestCatalogService:
         
         with responses.RequestsMock() as rsps:
             with patch('services.catalog_service.settings') as mock_settings:
-                mock_settings.PURVIEW_ENDPOINT = "https://test-purview.azure.com"
+                mock_settings.PURVIEW_ENDPOINT = "https://test-purview.endpoint.com"
                 
                 rsps.add(
                     responses.POST,
-                    'https://test-purview.azure.com/datamap/api/search/query?api-version=2023-09-01',
+                    'https://test-purview.endpoint.com/datamap/api/search/query?api-version=2023-09-01',
                     json={'value': []},
                     status=200
                 )
