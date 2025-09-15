@@ -68,7 +68,7 @@ def env_vars():
     return {
         'AZURE_AI_AGENT_ENDPOINT': 'https://test.endpoint.com',
         'MODEL_DEPLOYMENT_NAME': 'test-model',
-        'PURVIEW_ENDPOINT': 'https://test-purview.endpoint.com',
+        'PURVIEW_ENDPOINT': 'https://test-purview.azure.com',
         'BING_CONNECTION_ID': 'test-bing-id',
         'FABRIC_CONNECTION_ID': 'test-fabric-id',
         'ENABLE_FABRIC_AGENT': 'true',
@@ -80,24 +80,19 @@ def env_vars():
         'FLASK_DEBUG': 'false'
     }
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_env_vars(env_vars, monkeypatch):
     """Mock environment variables for testing"""
+    # Set environment variables first, before any imports
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
     
-    # Also patch the settings object directly to ensure it uses the mocked values
-    with patch('config.settings.settings') as mock_settings_obj:
-        mock_settings_obj.AZURE_AI_AGENT_ENDPOINT = env_vars['AZURE_AI_AGENT_ENDPOINT']
-        mock_settings_obj.MODEL_DEPLOYMENT_NAME = env_vars['MODEL_DEPLOYMENT_NAME']
-        mock_settings_obj.PURVIEW_ENDPOINT = env_vars['PURVIEW_ENDPOINT']
-        mock_settings_obj.BING_CONNECTION_ID = env_vars['BING_CONNECTION_ID']
-        mock_settings_obj.FABRIC_CONNECTION_ID = env_vars['FABRIC_CONNECTION_ID']
-        mock_settings_obj.ENABLE_FABRIC_AGENT = env_vars['ENABLE_FABRIC_AGENT'].lower() == 'true'
-        mock_settings_obj.DATABRICKS_INSTANCE = env_vars['DATABRICKS_INSTANCE']
-        mock_settings_obj.GENIE_SPACE_ID = env_vars['GENIE_SPACE_ID']
-        mock_settings_obj.DATABRICKS_AUTH_TOKEN = env_vars['DATABRICKS_AUTH_TOKEN']
-        mock_settings_obj.FLASK_HOST = env_vars['FLASK_HOST']
-        mock_settings_obj.FLASK_PORT = int(env_vars['FLASK_PORT'])
-        mock_settings_obj.FLASK_DEBUG = env_vars['FLASK_DEBUG'].lower() == 'true'
-        yield mock_settings_obj
+    # Import settings after env vars are set
+    from config.settings import Settings
+    
+    # Create a new settings instance with the mocked env vars
+    test_settings = Settings()
+    
+    # Patch the settings object in the main config module only
+    with patch('config.settings.settings', test_settings):
+        yield test_settings
