@@ -10,12 +10,28 @@ with patch.dict('sys.modules', {
     'azure.identity': MagicMock(),
     'azure.ai': MagicMock(),
     'azure.ai.projects': MagicMock(),
+    'azure.ai.agents': MagicMock(),
+    'azure.ai.agents.models': MagicMock(),
     'azure.purview': MagicMock(),
     'azure.purview.catalog': MagicMock(),
 }):
+    # Import blueprints first
     from api.health_routes import health_bp
     from api.query_routes import query_bp
     from api.thread_routes import thread_bp
+    
+    # Then import the actual app with mocked dependencies
+    with patch('app.connected_agent_service') as mock_app_service, \
+         patch('app.setup_logging') as mock_logging, \
+         patch('app.settings') as mock_app_settings:
+        
+        mock_app_service.cleanup.return_value = None
+        mock_logging.return_value = None
+        mock_app_settings.FLASK_HOST = '0.0.0.0'
+        mock_app_settings.FLASK_PORT = 5000
+        mock_app_settings.FLASK_DEBUG = False
+        
+        from app import app
 
 
 class TestAPIHealthRoutes:
@@ -250,17 +266,21 @@ class TestAPIThreadRoutes:
 
     @pytest.fixture
     def client(self):
-        """Create a test client for the Flask app"""
-        from flask import Flask
-        app = Flask(__name__)
-        app.register_blueprint(thread_bp)
+        """Create a test client using the real Flask app"""
         app.config['TESTING'] = True
         return app.test_client()
 
-    @patch('api.thread_routes.connected_agent_service')
-    def test_get_thread_messages(self, mock_service, client):
+    def test_get_thread_messages(self, client):
         """Test getting thread messages"""
-        mock_service.get_thread_messages.return_value = {
+        from services.connected_agent_service import connected_agent_service
+        from api.thread_routes import connected_agent_service as route_service
+        
+        print(f"DEBUG: Service instances are same: {connected_agent_service is route_service}")
+        print(f"DEBUG: Service ID: {id(connected_agent_service)}")
+        print(f"DEBUG: Route Service ID: {id(route_service)}")
+        
+        # Mock the method directly on the instance
+        expected_response = {
             'success': True,
             'messages': [
                 {
@@ -284,13 +304,21 @@ class TestAPIThreadRoutes:
             'message_count': 2
         }
         
-        response = client.get('/api/thread/thread-123/messages')
-        
-        assert response.status_code == 200
-        data = json.loads(response.data)
-        assert data['success'] is True
-        assert data['thread_id'] == 'thread-123'
-        assert data['message_count'] == 2
-        assert len(data['messages']) == 2
-        
-        mock_service.get_thread_messages.assert_called_once_with('thread-123')
+        with patch.object(connected_agent_service, 'get_thread_messages', return_value=expected_response) as mock_method:
+            print(f"DEBUG: Mock object: {mock_method}")
+            print(f"DEBUG: Mock return value: {mock_method.return_value}")
+            
+            response = client.get('/api/thread/thread-123/messages')
+            
+            print(f"DEBUG: Mock called: {mock_method.called}")
+            print(f"DEBUG: Mock call count: {mock_method.call_count}")
+            
+            assert response.status_code == 200
+            data = json.loads(response.data)
+            print(f"DEBUG: Actual response data: {data}")  # Debug output
+            assert data['success'] is True
+            assert data['thread_id'] == 'thread-123'
+            assert data['message_count'] == 2
+            assert len(data['messages']) == 2
+            
+            mock_method.assert_called_once_with('thread-123')
