@@ -68,7 +68,7 @@ test.describe('Agent Router Demo App - Main UI', () => {
 
   test('should display the main UI elements', async ({ page }) => {
     // Check title
-    await expect(page).toHaveTitle(/spark-template/);
+    await expect(page).toHaveTitle(/Purview Router/);
     
     // Check main heading
     await expect(page.getByText('Agent Router Demo App')).toBeVisible();
@@ -89,7 +89,7 @@ test.describe('Agent Router Demo App - Main UI', () => {
 
   test('should show agent selection dropdown', async ({ page }) => {
     // Click on agent selection dropdown
-    await page.getByRole('button', { name: /Auto Route \(using Purview\)/ }).click();
+    await page.getByRole('button', { name: /Auto Route/ }).click();
 
     // Check dropdown options
     await expect(page.getByText('Agent Selection')).toBeVisible();
@@ -136,7 +136,7 @@ test.describe('Agent Router Demo App - Main UI', () => {
 
   test('should process a direct query with specific agent', async ({ page }) => {
     // Select direct agent mode
-    await page.getByRole('button', { name: /Auto Route \(using Purview\)/ }).click();
+    await page.getByRole('button', { name: /Auto Route/ }).click();
     await page.getByText('Web Search').click();
 
     // Check manual mode indicator
