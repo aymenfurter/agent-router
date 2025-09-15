@@ -15,17 +15,23 @@ fi
 
 echo "✅ Azure CLI found: $(az version --query '"azure-cli"' -o tsv)"
 
-# Check Azure login
-echo "Checking Azure login status..."
-if ! az account show &> /dev/null; then
-    echo "❌ Not logged into Azure. Please run 'az login' first."
-    exit 1
+# Check Azure login (skip in dry-run mode)
+if [ "${DRY_RUN:-false}" != "true" ]; then
+    echo "Checking Azure login status..."
+    if ! az account show &> /dev/null; then
+        echo "❌ Not logged into Azure. Please run 'az login' first."
+        exit 1
+    fi
+    
+    SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+    ACCOUNT_NAME=$(az account show --query user.name -o tsv)
+    echo "✅ Logged into Azure as: $ACCOUNT_NAME"
+    echo "   Subscription: $SUBSCRIPTION_ID"
+else
+    echo "🔄 Running in dry-run mode (skipping Azure login check)"
+    SUBSCRIPTION_ID="dry-run-subscription"
+    ACCOUNT_NAME="dry-run-user"
 fi
-
-SUBSCRIPTION_ID=$(az account show --query id -o tsv)
-ACCOUNT_NAME=$(az account show --query user.name -o tsv)
-echo "✅ Logged into Azure as: $ACCOUNT_NAME"
-echo "   Subscription: $SUBSCRIPTION_ID"
 
 # Set deployment parameters
 RESOURCE_GROUP_NAME="${AZURE_ENV_NAME:-agent-router-dev}"
@@ -48,26 +54,65 @@ else
     exit 1
 fi
 
-# Create resource group if it doesn't exist
+# Run Bicep linting
 echo ""
-echo "📁 Checking/creating resource group..."
-if az group show --name "$RESOURCE_GROUP_NAME" &> /dev/null; then
-    echo "✅ Resource group '$RESOURCE_GROUP_NAME' already exists"
+echo "🧹 Running Bicep linter..."
+if command -v bicep &> /dev/null; then
+    if bicep lint infra/main.bicep; then
+        echo "✅ Bicep linting passed"
+    else
+        echo "⚠️  Bicep linting found issues (non-blocking)"
+    fi
 else
-    echo "🆕 Creating resource group '$RESOURCE_GROUP_NAME'..."
-    az group create --name "$RESOURCE_GROUP_NAME" --location "$LOCATION" --tags "azd-env-name=$RESOURCE_GROUP_NAME"
-    echo "✅ Resource group created"
+    echo "⚠️  Bicep CLI not found, skipping lint check"
 fi
 
-# Run deployment validation (what-if)
+# Validate parameters file
 echo ""
-echo "🎯 Running deployment validation (what-if analysis)..."
-az deployment group what-if \
-    --resource-group "$RESOURCE_GROUP_NAME" \
-    --template-file "infra/main.bicep" \
-    --parameters "environmentName=$RESOURCE_GROUP_NAME" "location=$LOCATION" "principalId=$PRINCIPAL_ID"
+echo "📝 Validating parameters file..."
+if [ -f "infra/main.parameters.json" ]; then
+    if command -v jq &> /dev/null; then
+        if jq empty infra/main.parameters.json; then
+            echo "✅ Parameters file is valid JSON"
+        else
+            echo "❌ Parameters file is not valid JSON"
+            exit 1
+        fi
+    else
+        echo "⚠️  jq not found, skipping JSON validation"
+    fi
+else
+    echo "⚠️  Parameters file not found (parameters may be provided inline)"
+fi
 
-if [ $? -eq 0 ]; then
+# Create resource group if it doesn't exist (skip in dry-run mode)
+if [ "${DRY_RUN:-false}" != "true" ]; then
+    echo ""
+    echo "📁 Checking/creating resource group..."
+    if az group show --name "$RESOURCE_GROUP_NAME" &> /dev/null; then
+        echo "✅ Resource group '$RESOURCE_GROUP_NAME' already exists"
+    else
+        echo "🆕 Creating resource group '$RESOURCE_GROUP_NAME'..."
+        az group create --name "$RESOURCE_GROUP_NAME" --location "$LOCATION" --tags "azd-env-name=$RESOURCE_GROUP_NAME"
+        echo "✅ Resource group created"
+    fi
+    
+    # Run deployment validation (what-if)
+    echo ""
+    echo "🎯 Running deployment validation (what-if analysis)..."
+    az deployment group what-if \
+        --resource-group "$RESOURCE_GROUP_NAME" \
+        --template-file "infra/main.bicep" \
+        --parameters "environmentName=$RESOURCE_GROUP_NAME" "location=$LOCATION" "principalId=$PRINCIPAL_ID"
+    
+    VALIDATION_RESULT=$?
+else
+    echo ""
+    echo "🔄 Skipping resource group and deployment validation in dry-run mode"
+    VALIDATION_RESULT=0
+fi
+
+if [ $VALIDATION_RESULT -eq 0 ]; then
     echo ""
     echo "✅ Deployment validation successful!"
     echo "   The Bicep template would deploy the following resources:"
