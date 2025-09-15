@@ -56,11 +56,77 @@ def mock_azure_dependencies():
         # Setup mock AI project client
         mock_client.return_value = Mock()
         
-        yield {
-            'credential': mock_cred,
-            'cli_credential': mock_cli_cred,
-            'client': mock_client
-        }
+        # Mock the connected agent service methods with default responses
+        from services.connected_agent_service import connected_agent_service
+        
+        # Mock common service methods
+        with patch.object(connected_agent_service, 'get_health_status') as mock_health, \
+             patch.object(connected_agent_service, 'get_thread_messages') as mock_messages, \
+             patch.object(connected_agent_service, 'analyze_purview') as mock_analyze, \
+             patch.object(connected_agent_service, 'process_query') as mock_process, \
+             patch.object(connected_agent_service, 'process_query_direct') as mock_direct, \
+             patch('config.settings.settings.validate') as mock_settings_validate:
+            
+            # Setup default mock responses
+            mock_health.return_value = {
+                'service': 'Connected Agent Service',
+                'initialized': True,
+                'agents_created': 3,
+                'main_agent_ready': True,
+                'project_client_ready': True
+            }
+            
+            mock_messages.return_value = {
+                'success': True,
+                'messages': [],
+                'thread_id': 'test-thread',
+                'message_count': 0
+            }
+            
+            mock_analyze.return_value = {
+                'success': True,
+                'purview': 'No relevant data assets found in catalog',
+                'catalog_results': {'status': 'success', 'assets_found': 0},
+                'confidence': 0.3
+            }
+            
+            mock_process.return_value = {
+                'success': True,
+                'query': 'test query',
+                'response': 'No response generated',
+                'purview_analysis': 'No relevant data assets found',
+                'annotations': [],
+                'metadata': {},
+                'analysis_metadata': {}
+            }
+            
+            mock_direct.return_value = {
+                'success': True,
+                'response': 'No response generated',
+                'metadata': {'agent_used': 'test', 'direct_call': True}
+            }
+            
+            # Mock settings validation
+            mock_settings_validate.return_value = {
+                'valid': True,
+                'missing_variables': [],
+                'fabric_enabled': True,
+                'genie_configured': True
+            }
+            
+            yield {
+                'credential': mock_cred,
+                'cli_credential': mock_cli_cred,
+                'client': mock_client,
+                'service_mocks': {
+                    'health': mock_health,
+                    'messages': mock_messages,
+                    'analyze': mock_analyze,
+                    'process': mock_process,
+                    'direct': mock_direct
+                },
+                'settings_validate': mock_settings_validate
+            }
 
 @pytest.fixture
 def env_vars():
