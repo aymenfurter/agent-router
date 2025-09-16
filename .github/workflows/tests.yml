@@ -34,9 +34,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CI: true
-    defaults:
-      run:
-        working-directory: frontend
 
     steps:
       - name: Checkout repository
@@ -51,12 +48,16 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        working-directory: frontend
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+        working-directory: frontend
 
       - name: Run unit tests
         run: npm run test:unit
+        working-directory: frontend
 
       - name: Run Playwright tests
         run: npm run test:e2e
+        working-directory: frontend
