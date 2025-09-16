@@ -58,6 +58,13 @@ Purview Agent Router is a sample application that:
 > 
 > This repository is a reference/demo implementation. It is **not hardened for production**: no auth, rate limiting, secure secret handling, or resilience patterns are implemented. Review, extend, and secure before any real-world deployment. The frontend is built using GitHub Spark (Built for rapid prototyping).
 
+## Project Structure
+
+- `backend/` – Flask API, services, configuration, and supporting Python modules
+- `frontend/` – React application built with Vite (previously `ui/`)
+- `scripts/` – helper scripts for building and running the full stack
+- `assets/` – documentation and media used by the README/demo
+
 ## Getting Started
 
 ### 1. Prerequisites
@@ -100,16 +107,16 @@ Optional:
 ### 4. Build UI + Install Backend
 
 ```bash
-./build.sh
+./scripts/build_all.sh
 ```
 
 ### 5. Run Server
 
 ```bash
-python app.py
+./scripts/start.sh
 ```
 
-Open: http://localhost:5000
+The start script builds both projects (if needed) and launches the Flask backend, which serves the compiled frontend at http://localhost:5000.
 
 ### 6. Try Queries
 
