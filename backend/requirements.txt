@@ -1,0 +1,12 @@
+azure-identity
+requests
+python-dotenv
+azure-purview-catalog
+openai
+azure-ai-projects
+azure-ai-agents>=1.2.0b2
+fastapi
+uvicorn[standard]
+pydantic
+Flask==3.0.3
+Werkzeug==3.0.4
